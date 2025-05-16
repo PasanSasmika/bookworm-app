@@ -1,19 +1,36 @@
-import { View, Text, Platform, KeyboardAvoidingView, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, Platform, KeyboardAvoidingView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
 import styles from "../../assets/styles/login.style";
 import { Ionicons } from '@expo/vector-icons';
+import CustomAlert from '../../components/customAlert.js';
 import COLORS from '../../constans/colors';
 import { TextInput } from 'react-native';
 import { useState } from 'react';
 import {  useRouter } from 'expo-router';
+import { useAuthStore } from '../../store/authStore';
 
 export default function Signup() {
     const [userName, setUserName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const {user, isLoading, register} = useAuthStore();    
+
+    const [alertVisible, setAlertVisible] = useState(false);
+const [alertMessage, setAlertMessage] = useState('');
+const [alertTitle, setAlertTitle] = useState('');
+
     const router = useRouter();
-     const handleSignUp = ()=>{}
+
+
+
+     const handleSignUp = async () => {
+  const result = await register(userName, email, password);
+  if (!result.success) {
+    setAlertTitle("Error");
+    setAlertMessage(result.error);
+    setAlertVisible(true);
+  }
+};
 
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS ==="ios"? "padding":"height"}>
@@ -36,7 +53,7 @@ export default function Signup() {
 
                       <TextInput
                       style={styles.input}
-                    placeholder='Jhon Doe'
+                    placeholder='Jhondoe'
                     placeholderTextColor={COLORS.placeholderText}
                     value={userName}
                     onChangeText={setUserName}
@@ -109,6 +126,17 @@ export default function Signup() {
                 </View>
             </View>
         </View>
+        <CustomAlert
+  visible={alertVisible}
+  title={alertTitle}
+  message={alertMessage}
+  buttons={[
+    {
+      text: 'OK',
+      onPress: () => setAlertVisible(false),
+    },
+  ]}
+/>
     </KeyboardAvoidingView>
   )
 }
