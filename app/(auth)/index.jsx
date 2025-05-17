@@ -5,15 +5,29 @@ import { Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../constans/colors';
 import { Link } from 'expo-router';
-
+import { useAuthStore } from '../../store/authStore';
+import CustomAlert from '../../components/customAlert';
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-   const [isLoading, setIsLoading] = useState(false);
+   const {user, isLoading, login} = useAuthStore();  
+   const [alertVisible, setAlertVisible] = useState(false);
+   const [alertMessage, setAlertMessage] = useState('');
+   const [alertTitle, setAlertTitle] = useState('');
 
-    const handleLogin = ()=>{}
+
+  const handleLogin  = async ()=>{
+
+  const result = await login( email, password);
+  if (!result.success) {
+    setAlertTitle("Error");
+    setAlertMessage(result.error);
+    setAlertVisible(true);
+  }
+    }
+    
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS ==="ios"? "padding":"height"}>
     <View style={styles.container}>
@@ -97,6 +111,17 @@ export default function Login() {
         </View>
         </View>
     </View>
+     <CustomAlert
+      visible={alertVisible}
+      title={alertTitle}
+      message={alertMessage}
+      buttons={[
+        {
+          text: 'OK',
+          onPress: () => setAlertVisible(false),
+        },
+      ]}
+    />
     </KeyboardAvoidingView>
   )
 }
