@@ -1,4 +1,4 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import styles from '../../assets/styles/home.style';
@@ -39,9 +39,10 @@ export default function Home() {
         setHasMore(pageNum < data.totalPages); 
         setPage(pageNum);
       } catch (error) {
-        console.log("Error in fetchning book",error)
+        console.log("Error in fetchning book",error) 
       } finally{
-        if(refresh) setRefreshing(false); 
+        if(refresh)
+           setRefreshing(false); 
         else setLoading(false);
       }
      }
@@ -52,17 +53,17 @@ export default function Home() {
 
      const renderItem = ({ item }) =>(
 
-      <View style={styles.bookCard}>
+      <View style={styles.bookCard}>  
       <View style={styles.bookHeader}>
         <View style={styles.userInfo}>
           <Image source={{ uri: item.user.profileImage }} style={styles.avatar}/>
-          <Text style={styles.username}>{item.user.userName}</Text>
+          <Text style={styles.username}>{item.user.userName}</Text>  
         </View>
 
       </View>
       <View style={styles.bookImageContainer}> 
         <Image source={item.image} style={styles.bookImage} contentFit='cover'/>
-      </View>
+      </View> 
 
        <View style={styles.bookDetails}>
         <Text style={styles.bookTitle}>{item.title}</Text>
@@ -105,7 +106,13 @@ export default function Home() {
       keyExtractor={(item)=> item._id}
       contentContainerStyle={styles.listContainer}
       showsVerticalScrollIndicator={false}
-
+      refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={()=> fetchBooks(1, true)}
+        colors={[COLORS.primary]}
+        tintColor={COLORS.primary}/>
+      }
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.1}
 
