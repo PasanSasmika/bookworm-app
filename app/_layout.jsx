@@ -1,14 +1,25 @@
-import { Stack, useRouter, useSegments } from "expo-router";
+import { SplashScreen, Stack, useRouter, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import SafeScreen from "../components/SafeScreen"
 import { StatusBar } from "expo-status-bar";
 import { useAuthStore } from "../store/authStore"
 import { useEffect } from "react";
+import { useFonts} from "expo-font";
+
+SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
 
   const router = useRouter();
   const segmant = useSegments();
   const { checkAuth, user, token} = useAuthStore();
+
+  const [fontsLoaded] = useFonts({
+      "JetBrainsMono-Medium": require("../assets/fonts/JetBrainsMono-Medium.ttf"),
+  });
+
+  useEffect(()=>{
+    if(fontsLoaded) SplashScreen.hideAsync();
+  },[fontsLoaded])
 
   useEffect(()=>{
     checkAuth();
@@ -16,13 +27,13 @@ export default function RootLayout() {
 
   // handle the navigation based on auth state
 
-  useEffect(()=>{
-   const inAuthScreeen = segmant[0] === "(auth)";
-   const isSignIn = user && token;
+  // useEffect(()=>{
+  //  const inAuthScreeen = segmant[0] === "(auth)";
+  //  const isSignIn = user && token;
    
-   if (!isSignIn && !inAuthScreeen) router.replace("/(auth)");
-   else if (isSignIn && inAuthScreeen) router.replace("/(tabs)");
-  },[user,token,segmant])
+  //  if (!isSignIn && !inAuthScreeen) router.replace("/(auth)");
+  //  else if (isSignIn && inAuthScreeen) router.replace("/(tabs)");
+  // },[user,token,segmant])
 
   return <Stack  screenOptions={{ headerShown:false }}>
     <SafeAreaProvider>
@@ -34,3 +45,4 @@ export default function RootLayout() {
      </SafeAreaProvider>
   </Stack>;
 }
+  
