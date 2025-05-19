@@ -9,9 +9,11 @@ import { formatPublishDate } from '../../libs/utils.js';
 import { ActivityIndicator } from 'react-native';
 import Loader from '../../components/Loader.jsx';
 
+ export const sleep = (ms) => new Promise((resolve)=> setTimeout(resolve, ms))
+
 export default function Home() {
 
-     const { token , logout} = useAuthStore(); 
+     const { token } = useAuthStore(); 
      const [books, setBooks] = useState([]);
      const [loading, setLoading] = useState(true);
      const [refreshing, setRefreshing]  = useState(false);
@@ -41,8 +43,11 @@ export default function Home() {
       } catch (error) {
         console.log("Error in fetchning book",error) 
       } finally{
-        if(refresh)
-           setRefreshing(false); 
+        if(refresh){
+            await sleep(800);
+              setRefreshing(false); 
+        }
+         
         else setLoading(false);
       }
      }
@@ -139,9 +144,6 @@ export default function Home() {
 
       }
       />
-      <TouchableOpacity onPress={logout}> 
-        <Text>Logout</Text> 
-      </TouchableOpacity>
     </View>
   )
 }
