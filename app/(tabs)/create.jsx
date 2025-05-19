@@ -8,7 +8,8 @@ import COLORS from '../../constans/colors';
 import { Image } from 'react-native';
 import * as ImagePicker from "expo-image-picker"
 import * as FileSystem from "expo-file-system"
-import { ActivityIndicator } from 'react-native-web';
+import { ActivityIndicator } from 'react-native';
+import { useAuthStore } from '../../store/authStore';
 
 export default function Create() {
 
@@ -20,7 +21,7 @@ export default function Create() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
- 
+  const { token } = useAuthStore();
   const pickImage = async ()=>{
     try {
       //request permition if needed
@@ -62,7 +63,54 @@ export default function Create() {
     }
   }
 
-  const handleSubmit = async ()=>{}
+  const handleSubmit = async ()=>{
+    if(!title || !caption || !imageBase64 || !rating) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      //get file extention from URI or default to jpeg
+
+      const uriParts = image.split(".");
+      const filetype = uriParts[uriParts.length -1];
+      const imageType = filetype ? `image/${filetype.toLowerCase()}` : "image/jpeg";
+
+      const imageDataUrl = `data:${imageType};base64,${imageBase64}`;
+
+      const response = await fetch("https://bookworm-z84w.onrender.com/api/books",{
+        method:"POST",
+        headers:{
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          caption,
+          rating:rating.toString(),
+          image: imageDataUrl,
+        }),
+      })
+
+      const data = await response.json();
+      if(!response.ok) throw new Error(data.message || "Somthing went wrong");
+
+      Alert.alert("Success", "Your book recommendation has been posted");
+      setTitle("");
+      setCaption("");
+      setRating(3);
+      setImage(null);
+      setImageBase64(null);
+      router.push("/");
+    } catch (error) {
+      console.error("Error creating post", error);
+      Alert.alert("Error", error.message || "Somthing went wrong");
+    }finally{
+      setLoading(false)
+    }
+  }
 
    const renderRatingPicker = ()=> {
     const stars = [];
@@ -146,7 +194,7 @@ export default function Create() {
           placeholder=' write your rewiew or thoughts about this book...'
           placeholderTextColor={COLORS.placeholderText}
           value={caption}
-          onChangeText={setCaption}
+          onChangeText={setCaption} 
           multiline/>
         </View>
 

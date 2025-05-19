@@ -17,7 +17,7 @@ export const useAuthStore = create((set)=>({
                 },
                 body:JSON.stringify({
                     userName,
-                    email,
+                    email, 
                     password
                 }),
             })

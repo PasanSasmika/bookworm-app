@@ -19,7 +19,7 @@ export default function RootLayout() {
   useEffect(()=>{
    const inAuthScreeen = segmant[0] === "(auth)";
    const isSignIn = user && token;
-
+   
    if (!isSignIn && !inAuthScreeen) router.replace("/(auth)");
    else if (isSignIn && inAuthScreeen) router.replace("/(tabs)");
   },[user,token,segmant])
