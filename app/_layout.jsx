@@ -3,12 +3,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import SafeScreen from "../components/SafeScreen"
 import { StatusBar } from "expo-status-bar";
 import { useAuthStore } from "../store/authStore"
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFonts} from "expo-font";
 
 SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
-
+ const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const segmant = useSegments();
   const { checkAuth, user, token} = useAuthStore();
@@ -22,27 +22,38 @@ export default function RootLayout() {
   },[fontsLoaded])
 
   useEffect(()=>{
-    checkAuth();
+    checkAuth(); 
+    setIsMounted(true);
   },[])
 
   // handle the navigation based on auth state
 
-  // useEffect(()=>{
-  //  const inAuthScreeen = segmant[0] === "(auth)";
-  //  const isSignIn = user && token;
-   
-  //  if (!isSignIn && !inAuthScreeen) router.replace("/(auth)");
-  //  else if (isSignIn && inAuthScreeen) router.replace("/(tabs)");
-  // },[user,token,segmant])
+   useEffect(() => {
+    if (!isMounted || !fontsLoaded) return;
+    
+    const inAuthScreen = segmant[0] === "(auth)";
+    const isSignIn = user && token;
+    
+    if (!isSignIn && !inAuthScreen) {
+      router.replace("/(auth)");
+    } else if (isSignIn && inAuthScreen) {
+      router.replace("/(tabs)");
+    }
+  }, [user, token, segmant, isMounted, fontsLoaded]);
+ 
+  if (!fontsLoaded) {
+    return null;
+  }
 
-  return <Stack  screenOptions={{ headerShown:false }}>
+  return (
     <SafeAreaProvider>
       <SafeScreen>
-    <Stack.Screen name="(tabs)"/>
-     <Stack.Screen name="(auth)"/>
-     </SafeScreen>
-     <StatusBar style="dark"/>
-     </SafeAreaProvider>
-  </Stack>;
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(auth)" />
+        </Stack>
+        <StatusBar style="dark" />
+      </SafeScreen>
+    </SafeAreaProvider>
+  );
 }
-  
